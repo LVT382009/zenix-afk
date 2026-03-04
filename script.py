@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import chromedriver_autoinstaller
 import time
 import os
@@ -23,10 +25,11 @@ def create_driver():
 def login(driver, email, password):
     print("🔐 Đang login...")
     driver.get("https://dash.zenix.sg/login")
-    time.sleep(3)
     
-    driver.find_element(By.NAME, "email").send_keys(email)
-    driver.find_element(By.NAME, "password").send_keys(password)
+    wait = WebDriverWait(driver, 10)
+    
+    wait.until(EC.presence_of_element_located((By.ID, "email"))).send_keys(email)
+    driver.find_element(By.ID, "password").send_keys(password)
     driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
     
     time.sleep(3)
