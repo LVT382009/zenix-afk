@@ -6,9 +6,38 @@ from selenium.webdriver.support import expected_conditions as EC
 import chromedriver_autoinstaller
 import time
 import os
+import json
+from datetime import datetime
 
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
+
+# Load stats cũ nếu có
+def load_stats():
+    try:
+        with open("stats.json", "r") as f:
+            return json.load(f)
+    except:
+        return {
+            "total_coins": 0,
+            "start_coin": 0,
+            "coins_per_hour": 0,
+            "coins_today": 0,
+            "today_date": datetime.now().strftime("%Y-%m-%d"),
+            "last_updated": "",
+            "logs": []
+        }
+
+def save_stats(stats):
+    with open("stats.json", "w") as f:
+        json.dump(stats, f, indent=2, ensure_ascii=False)
+
+def add_log(stats, message):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    log_entry = f"{timestamp} - {message}"
+    stats["logs"].insert(0, log_entry)
+    stats["logs"] = stats["logs"][:50]  # giữ 50 log gần nhất
+    print(log_entry)
 
 def create_driver():
     options = Options()
@@ -40,41 +69,70 @@ def get_coins(driver):
     except:
         return None
 
-def reset_afk(driver):
-    print("🔄 Đang reset AFK...")
+def reset_afk(driver, stats):
+    add_log(stats, "🔄 Reset AFK - Coin không tăng!")
     driver.get("https://dash.zenix.sg/dashboard")
     time.sleep(2)
     driver.get("https://dash.zenix.sg/dashboard/afk")
     time.sleep(2)
-    print("✅ Đã reset xong!")
+    add_log(stats, "✅ Reset xong!")
 
 def stay_afk(driver):
+    stats = load_stats()
+
     print("🚀 Đang vào trang AFK...")
     driver.get("https://dash.zenix.sg/dashboard/afk")
     time.sleep(2)
 
+    start_time = datetime.now()
     count = 0
     last_coin = get_coins(driver)
-    print(f"💰 Coin hiện tại: {last_coin}")
+    stats["start_coin"] = last_coin
+
+    # Reset coin hôm nay nếu sang ngày mới
+    today = datetime.now().strftime("%Y-%m-%d")
+    if stats["today_date"] != today:
+        stats["coins_today"] = 0
+        stats["today_date"] = today
+
+    add_log(stats, f"🚀 Bắt đầu AFK | 💰 Coin: {last_coin}")
+    save_stats(stats)
 
     while True:
         time.sleep(60)
         count += 1
 
         current_coin = get_coins(driver)
-        print(f"⏱️ {count} phút | 💰 Coin: {current_coin}")
+        now = datetime.now()
+
+        # Tính coin/giờ
+        elapsed_hours = (now - start_time).seconds / 3600
+        if elapsed_hours > 0 and current_coin:
+            coins_earned = current_coin - stats["start_coin"]
+            stats["coins_per_hour"] = round(coins_earned / elapsed_hours, 1)
+
+        # Cập nhật coin hôm nay
+        if current_coin and last_coin:
+            gained = current_coin - last_coin
+            if gained > 0:
+                stats["coins_today"] += gained
+
+        stats["total_coins"] = current_coin or 0
+        stats["last_updated"] = now.strftime("%Y-%m-%d %H:%M:%S")
 
         if current_coin is None or current_coin <= last_coin:
-            print("🚨 Coin không tăng! Đang reset...")
-            reset_afk(driver)
+            reset_afk(driver, stats)
             last_coin = get_coins(driver)
-            print(f"💰 Coin sau reset: {last_coin}")
+            add_log(stats, f"💰 Coin sau reset: {last_coin}")
         else:
+            add_log(stats, f"✅ +{current_coin - last_coin} coin | Tổng: {current_coin}")
             last_coin = current_coin
+
+        save_stats(stats)
 
 if __name__ == "__main__":
     if not EMAIL or not PASSWORD:
-        print("❌ Lỗi: Không tìm thấy EMAIL hoặc PASSWORD trong secrets!")
+        print("❌ Lỗi: Không tìm thấy EMAIL hoặc PASSWORD!")
         exit(1)
 
     driver = create_driver()
