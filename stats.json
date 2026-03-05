@@ -1,11 +1,14 @@
 {
-  "total_coins": 1185,
+  "total_coins": 1186,
   "start_coin": 1156,
   "coins_per_hour": 53.2,
   "coins_today": 0,
   "today_date": "2026-03-05",
-  "last_updated": "2026-03-05 21:13:12",
+  "last_updated": "2026-03-05 21:14:18",
   "logs": [
+    "21:14:23 - 💰 Coin sau reset: 1187",
+    "21:14:23 - ✅ Reset xong!",
+    "21:14:18 - 🔄 Reset AFK - Coin không tăng!",
     "21:13:18 - 💰 Coin sau reset: 1186",
     "21:13:18 - ✅ Reset xong!",
     "21:13:12 - 🔄 Reset AFK - Coin không tăng!",
@@ -52,9 +55,6 @@
     "20:57:57 - ✅ Reset xong!",
     "20:57:52 - 🔄 Reset AFK - Coin không tăng!",
     "20:56:51 - 💰 Coin sau reset: 1171",
-    "20:56:51 - ✅ Reset xong!",
-    "20:56:47 - 🔄 Reset AFK - Coin không tăng!",
-    "20:55:46 - 💰 Coin sau reset: 1170",
-    "20:55:46 - ✅ Reset xong!"
+    "20:56:51 - ✅ Reset xong!"
   ]
 }
