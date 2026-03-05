@@ -34,6 +34,7 @@ jobs:
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Push stats to GitHub
         run: |
