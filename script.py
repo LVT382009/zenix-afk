@@ -4,15 +4,36 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import chromedriver_autoinstaller
-import time
-import os
-import json
+import time, os, json, base64, requests
 from datetime import datetime
 
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
+GH_TOKEN = os.environ.get("GH_TOKEN")
+REPO = "LVT382009/zenix-afk"
 
-# Load stats cũ nếu có
+def push_stats(stats):
+    try:
+        url = f"https://api.github.com/repos/{REPO}/contents/stats.json"
+        headers = {
+            "Authorization": f"token {GH_TOKEN}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        content = base64.b64encode(json.dumps(stats, ensure_ascii=False, indent=2).encode()).decode()
+
+        # Lấy SHA file cũ nếu có
+        r = requests.get(url, headers=headers)
+        sha = r.json().get("sha") if r.status_code == 200 else None
+
+        data = {"message": "Update stats", "content": content}
+        if sha:
+            data["sha"] = sha
+
+        requests.put(url, headers=headers, json=data)
+        print("📤 Đã push stats lên GitHub!")
+    except Exception as e:
+        print(f"⚠️ Push thất bại: {e}")
+
 def load_stats():
     try:
         with open("stats.json", "r") as f:
@@ -36,7 +57,7 @@ def add_log(stats, message):
     timestamp = datetime.now().strftime("%H:%M:%S")
     log_entry = f"{timestamp} - {message}"
     stats["logs"].insert(0, log_entry)
-    stats["logs"] = stats["logs"][:50]  # giữ 50 log gần nhất
+    stats["logs"] = stats["logs"][:50]
     print(log_entry)
 
 def create_driver():
@@ -79,7 +100,6 @@ def reset_afk(driver, stats):
 
 def stay_afk(driver):
     stats = load_stats()
-
     print("🚀 Đang vào trang AFK...")
     driver.get("https://dash.zenix.sg/dashboard/afk")
     time.sleep(2)
@@ -89,7 +109,6 @@ def stay_afk(driver):
     last_coin = get_coins(driver)
     stats["start_coin"] = last_coin
 
-    # Reset coin hôm nay nếu sang ngày mới
     today = datetime.now().strftime("%Y-%m-%d")
     if stats["today_date"] != today:
         stats["coins_today"] = 0
@@ -97,11 +116,11 @@ def stay_afk(driver):
 
     add_log(stats, f"🚀 Bắt đầu AFK | 💰 Coin: {last_coin}")
     save_stats(stats)
+    push_stats(stats)  # Push ngay lần đầu
 
     while True:
         time.sleep(60)
         count += 1
-
         current_coin = get_coins(driver)
         now = datetime.now()
 
@@ -111,7 +130,7 @@ def stay_afk(driver):
             coins_earned = current_coin - stats["start_coin"]
             stats["coins_per_hour"] = round(coins_earned / elapsed_hours, 1)
 
-        # Cập nhật coin hôm nay
+        # Coin hôm nay
         if current_coin and last_coin:
             gained = current_coin - last_coin
             if gained > 0:
@@ -129,6 +148,7 @@ def stay_afk(driver):
             last_coin = current_coin
 
         save_stats(stats)
+        push_stats(stats)  # Push mỗi phút
 
 if __name__ == "__main__":
     if not EMAIL or not PASSWORD:
@@ -136,7 +156,6 @@ if __name__ == "__main__":
         exit(1)
 
     driver = create_driver()
-
     try:
         login(driver, EMAIL, PASSWORD)
         stay_afk(driver)
