@@ -10,7 +10,7 @@ from datetime import datetime
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 GH_TOKEN = os.environ.get("GH_TOKEN")
-REPO = "LVT382009/zenix-afk"
+REPO = "LVT382009/zenix-afk"  # ← đổi thành tên account của bạn
 
 def push_stats(stats):
     try:
@@ -20,15 +20,11 @@ def push_stats(stats):
             "Accept": "application/vnd.github.v3+json"
         }
         content = base64.b64encode(json.dumps(stats, ensure_ascii=False, indent=2).encode()).decode()
-
-        # Lấy SHA file cũ nếu có
         r = requests.get(url, headers=headers)
         sha = r.json().get("sha") if r.status_code == 200 else None
-
         data = {"message": "Update stats", "content": content}
         if sha:
             data["sha"] = sha
-
         requests.put(url, headers=headers, json=data)
         print("📤 Đã push stats lên GitHub!")
     except Exception as e:
@@ -90,14 +86,6 @@ def get_coins(driver):
     except:
         return None
 
-def reset_afk(driver, stats):
-    add_log(stats, "🔄 Reset AFK - Coin không tăng!")
-    driver.get("https://dash.zenix.sg/dashboard")
-    time.sleep(2)
-    driver.get("https://dash.zenix.sg/dashboard/afk")
-    time.sleep(2)
-    add_log(stats, "✅ Reset xong!")
-
 def stay_afk(driver):
     stats = load_stats()
     print("🚀 Đang vào trang AFK...")
@@ -105,7 +93,6 @@ def stay_afk(driver):
     time.sleep(2)
 
     start_time = datetime.now()
-    count = 0
     last_coin = get_coins(driver)
     stats["start_coin"] = last_coin
 
@@ -116,18 +103,17 @@ def stay_afk(driver):
 
     add_log(stats, f"🚀 Bắt đầu AFK | 💰 Coin: {last_coin}")
     save_stats(stats)
-    push_stats(stats)  # Push ngay lần đầu
+    push_stats(stats)
 
     while True:
         time.sleep(60)
-        count += 1
         current_coin = get_coins(driver)
         now = datetime.now()
 
         # Tính coin/giờ
         elapsed_hours = (now - start_time).seconds / 3600
         if elapsed_hours > 0 and current_coin:
-            coins_earned = current_coin - stats["start_coin"]
+            coins_earned = current_coin - (stats["start_coin"] or 0)
             stats["coins_per_hour"] = round(coins_earned / elapsed_hours, 1)
 
         # Coin hôm nay
@@ -135,20 +121,16 @@ def stay_afk(driver):
             gained = current_coin - last_coin
             if gained > 0:
                 stats["coins_today"] += gained
+                add_log(stats, f"✅ +{gained} coin | Tổng: {current_coin}")
+            else:
+                add_log(stats, f"⏳ Chờ coin... ({current_coin})")
 
         stats["total_coins"] = current_coin or 0
         stats["last_updated"] = now.strftime("%Y-%m-%d %H:%M:%S")
-
-        if current_coin is None or current_coin <= last_coin:
-            reset_afk(driver, stats)
-            last_coin = get_coins(driver)
-            add_log(stats, f"💰 Coin sau reset: {last_coin}")
-        else:
-            add_log(stats, f"✅ +{current_coin - last_coin} coin | Tổng: {current_coin}")
-            last_coin = current_coin
+        last_coin = current_coin or last_coin
 
         save_stats(stats)
-        push_stats(stats)  # Push mỗi phút
+        push_stats(stats)
 
 if __name__ == "__main__":
     if not EMAIL or not PASSWORD:
