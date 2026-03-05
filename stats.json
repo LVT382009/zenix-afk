@@ -4,8 +4,9 @@
   "coins_per_hour": 0.0,
   "coins_today": 0,
   "today_date": "2026-03-05",
-  "last_updated": "2026-03-05 22:23:01",
+  "last_updated": "2026-03-05 22:24:01",
   "logs": [
+    "22:24:01 - ⏳ Chờ coin... (1243)",
     "22:23:01 - ⏳ Chờ coin... (1243)",
     "22:22:00 - ⏳ Chờ coin... (1243)",
     "22:20:59 - ⏳ Chờ coin... (1243)",
@@ -54,7 +55,6 @@
     "22:02:38 - 🔄 Reset AFK - Coin không tăng!",
     "22:01:38 - 💰 Coin sau reset: 1230",
     "22:01:38 - ✅ Reset xong!",
-    "22:01:33 - 🔄 Reset AFK - Coin không tăng!",
-    "22:00:32 - 💰 Coin sau reset: 1229"
+    "22:01:33 - 🔄 Reset AFK - Coin không tăng!"
   ]
 }
