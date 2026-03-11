@@ -1,12 +1,12 @@
 {
   "total_coins": 2684,
-  "start_coin": 2684,
+  "start_coin": 2967,
   "coins_per_hour": 0.0,
   "coins_today": 0,
   "today_date": "2026-03-11",
-  "last_updated": "2026-03-11 20:36:33",
+  "last_updated": "2026-03-11 20:35:32",
   "logs": [
-    "20:36:33 - ⏳ Chờ coin... (2684)",
+    "20:37:30 - 🚀 Bắt đầu AFK | 💰 Coin: 2967",
     "20:35:32 - ⏳ Chờ coin... (2684)",
     "20:34:31 - ⏳ Chờ coin... (2684)",
     "20:33:31 - ⏳ Chờ coin... (2684)",
