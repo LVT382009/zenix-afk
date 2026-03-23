@@ -3,10 +3,10 @@
   "start_coin": 12552,
   "coins_per_hour": 0.0,
   "coins_today": 0,
-  "today_date": "2026-03-22",
-  "last_updated": "2026-03-23 02:30:08",
+  "today_date": "2026-03-23",
+  "last_updated": "2026-03-23 02:29:07",
   "logs": [
-    "02:30:08 - ⏳ Chờ coin... (12552)",
+    "02:30:53 - 🚀 Bắt đầu AFK | 💰 Coin: 12552",
     "02:29:07 - ⏳ Chờ coin... (12552)",
     "02:28:07 - ⏳ Chờ coin... (12552)",
     "02:27:06 - ⏳ Chờ coin... (12552)",
