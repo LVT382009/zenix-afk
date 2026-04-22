@@ -1,10 +1,10 @@
 {
-  "total_coins": 9904,
+  "total_coins": 0,
   "start_coin": null,
   "coins_per_hour": 0.0,
   "coins_today": 0,
   "today_date": "2026-04-22",
-  "last_updated": "2026-04-20 07:16:37",
+  "last_updated": "2026-04-22 06:58:59",
   "logs": [
     "06:57:58 - 🚀 Bắt đầu AFK | 💰 Coin: None",
     "07:16:37 - ⏳ Chờ coin... (9904)",
